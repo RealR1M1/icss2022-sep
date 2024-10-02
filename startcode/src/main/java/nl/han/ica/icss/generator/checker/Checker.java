@@ -1,4 +1,4 @@
-package nl.han.ica.icss.checker;
+package nl.han.ica.icss.generator.checker;
 
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.AST;
