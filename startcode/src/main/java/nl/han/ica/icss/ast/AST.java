@@ -1,9 +1,8 @@
 package nl.han.ica.icss.ast;
 
-import nl.han.ica.icss.checker.SemanticError;
+import nl.han.ica.icss.generator.checker.SemanticError;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Objects;
 
 public class AST {

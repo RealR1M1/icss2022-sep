@@ -45,5 +45,7 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: EOF;
+stylesheet: stylerule+;
+stylerule: 'p {'declaration'}';
+declaration: 'width 10px';
 

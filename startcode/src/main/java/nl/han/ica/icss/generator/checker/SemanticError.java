@@ -1,4 +1,4 @@
-package nl.han.ica.icss.checker;
+package nl.han.ica.icss.generator.checker;
 
 public class SemanticError {
 	public String description;
