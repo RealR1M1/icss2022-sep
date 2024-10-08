@@ -69,7 +69,7 @@ public class HANLinkedList<ASTNode> implements IHANLinkedList<ASTNode> {
 
     @Override
     public ASTNode getFirst() {
-        return header.data;
+        return header.getNext().getData();
     }
 
     @Override
