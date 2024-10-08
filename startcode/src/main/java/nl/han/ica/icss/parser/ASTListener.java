@@ -57,31 +57,33 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
-	public void enterTagSelector(ICSSParser.TagSelectorContext ctx) {
+	public void enterSelector(ICSSParser.SelectorContext ctx) {
+		Selector selector = null;
+
 		if (ctx.LOWER_IDENT() != null){
-			TagSelector tagSelector = new TagSelector(ctx.getText());
-			currentContainer.push(tagSelector);
+			selector = new TagSelector(ctx.getText());
 		} else if (ctx.CLASS_IDENT() != null){
-			ClassSelector classSelector = new ClassSelector(ctx.getText());
-			currentContainer.push(classSelector);
+			selector = new ClassSelector(ctx.getText());
 		} else if (ctx.ID_IDENT() != null) {
-			IdSelector idSelector = new IdSelector(ctx.getText());
-			currentContainer.push(idSelector);
+			selector = new IdSelector(ctx.getText());
 		}
+
+		currentContainer.push(selector);
 	}
 
 	@Override
-	public void exitTagSelector(ICSSParser.TagSelectorContext ctx) {
+	public void exitSelector(ICSSParser.SelectorContext ctx) {
+		Selector selector = null;
+
 		if (ctx.LOWER_IDENT() != null){
-			TagSelector tagSelector = (TagSelector) currentContainer.pop();
-			currentContainer.peek().addChild(tagSelector);
+			selector = (TagSelector) currentContainer.pop();
 		} else if (ctx.CLASS_IDENT() != null){
-			ClassSelector classSelector = (ClassSelector) currentContainer.pop();
-			currentContainer.peek().addChild(classSelector);
+			selector = (ClassSelector) currentContainer.pop();
 		} else if (ctx.ID_IDENT() != null) {
-			IdSelector idSelector = (IdSelector) currentContainer.pop();
-			currentContainer.peek().addChild(idSelector);
+			selector = (IdSelector) currentContainer.pop();
 		}
+
+		currentContainer.peek().addChild(selector);
 	}
 
 	@Override
