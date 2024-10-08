@@ -43,9 +43,11 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 
-
 //--- PARSER: ---
 stylesheet: stylerule+;
-stylerule: 'p {'declaration'}';
-declaration: 'width 10px';
+stylerule: tagSelector OPEN_BRACE declaration CLOSE_BRACE;
+tagSelector: LOWER_IDENT;
+declaration: property COLON expression SEMICOLON;
+property: LOWER_IDENT;
+expression: PIXELSIZE;
 
