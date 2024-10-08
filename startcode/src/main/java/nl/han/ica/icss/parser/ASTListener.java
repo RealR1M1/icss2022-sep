@@ -58,14 +58,30 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterTagSelector(ICSSParser.TagSelectorContext ctx) {
-		TagSelector tagSelector = new TagSelector(ctx.getText());
-		currentContainer.push(tagSelector);
+		if (ctx.LOWER_IDENT() != null){
+			TagSelector tagSelector = new TagSelector(ctx.getText());
+			currentContainer.push(tagSelector);
+		} else if (ctx.CLASS_IDENT() != null){
+			ClassSelector classSelector = new ClassSelector(ctx.getText());
+			currentContainer.push(classSelector);
+		} else if (ctx.ID_IDENT() != null) {
+			IdSelector idSelector = new IdSelector(ctx.getText());
+			currentContainer.push(idSelector);
+		}
 	}
 
 	@Override
 	public void exitTagSelector(ICSSParser.TagSelectorContext ctx) {
-		TagSelector tagSelector = (TagSelector) currentContainer.pop();
-		currentContainer.peek().addChild(tagSelector);
+		if (ctx.LOWER_IDENT() != null){
+			TagSelector tagSelector = (TagSelector) currentContainer.pop();
+			currentContainer.peek().addChild(tagSelector);
+		} else if (ctx.CLASS_IDENT() != null){
+			ClassSelector classSelector = (ClassSelector) currentContainer.pop();
+			currentContainer.peek().addChild(classSelector);
+		} else if (ctx.ID_IDENT() != null) {
+			IdSelector idSelector = (IdSelector) currentContainer.pop();
+			currentContainer.peek().addChild(idSelector);
+		}
 	}
 
 	@Override
@@ -94,7 +110,13 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterExpression(ICSSParser.ExpressionContext ctx) {
-		Expression expression;
+		if (ctx.COLOR() != null) {
+			Expression expression = new ColorLiteral(ctx.getText());
+			currentContainer.push(expression);
+		} else if (ctx.PIXELSIZE() != null) {
+			Expression expression = new PixelLiteral(ctx.getText());
+			currentContainer.push(expression);
+		} else throw new IllegalStateException("Expression cannot be empty");
 	}
 
 	@Override
