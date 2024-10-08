@@ -58,7 +58,7 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterTagSelector(ICSSParser.TagSelectorContext ctx) {
-		TagSelector tagSelector = new TagSelector("TAG"); //TODO: make tag dynamic
+		TagSelector tagSelector = new TagSelector(ctx.getText());
 		currentContainer.push(tagSelector);
 	}
 
@@ -66,5 +66,34 @@ public class ASTListener extends ICSSBaseListener {
 	public void exitTagSelector(ICSSParser.TagSelectorContext ctx) {
 		TagSelector tagSelector = (TagSelector) currentContainer.pop();
 		currentContainer.peek().addChild(tagSelector);
+	}
+
+	@Override
+	public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
+		Declaration declaration = new Declaration();
+		currentContainer.push(declaration);
+	}
+
+	@Override
+	public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
+		Declaration declaration = (Declaration) currentContainer.pop();
+		currentContainer.peek().addChild(declaration);
+	}
+
+	@Override
+	public void enterProperty(ICSSParser.PropertyContext ctx) {
+		PropertyName property = new PropertyName(ctx.getText());
+		currentContainer.push(property);
+	}
+
+	@Override
+	public void exitProperty(ICSSParser.PropertyContext ctx) {
+		PropertyName property = (PropertyName) currentContainer.pop();
+		currentContainer.peek().addChild(property);
+	}
+
+	@Override
+	public void enterExpression(ICSSParser.ExpressionContext ctx) {
+		//TODO: Implement
 	}
 }

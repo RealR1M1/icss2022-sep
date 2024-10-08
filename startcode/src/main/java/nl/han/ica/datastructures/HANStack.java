@@ -26,7 +26,7 @@ public class HANStack<ASTNode> implements IHANStack<ASTNode>{
 
     @Override
     public ASTNode peek() {
-        if (list.getSize() == 0){
+        if (list.getSize() == 1){
             throw new EmptyStackException();
         }
         return list.getFirst();
