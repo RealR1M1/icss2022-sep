@@ -94,6 +94,12 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterExpression(ICSSParser.ExpressionContext ctx) {
-		//TODO: Implement
+		Expression expression;
+	}
+
+	@Override
+	public void exitExpression(ICSSParser.ExpressionContext ctx) {
+		Expression expression = (Expression) currentContainer.pop();
+		currentContainer.peek().addChild(expression);
 	}
 }
