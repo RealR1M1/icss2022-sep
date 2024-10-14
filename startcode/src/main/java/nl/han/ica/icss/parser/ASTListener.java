@@ -99,6 +99,30 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
+	public void enterPixelSize(ICSSParser.PixelSizeContext ctx) {
+		PixelLiteral pixelLiteral = new PixelLiteral(ctx.getText());
+		currentContainer.push(pixelLiteral);
+	}
+
+	@Override
+	public void exitPixelSize(ICSSParser.PixelSizeContext ctx) {
+		PixelLiteral pixelLiteral = (PixelLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(pixelLiteral);
+	}
+
+	@Override
+	public void enterColor(ICSSParser.ColorContext ctx) {
+		ColorLiteral colorLiteral = new ColorLiteral(ctx.getText());
+		currentContainer.push(colorLiteral);
+	}
+
+	@Override
+	public void exitColor(ICSSParser.ColorContext ctx) {
+		ColorLiteral colorLiteral = (ColorLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(colorLiteral);
+	}
+
+	@Override
 	public void enterProperty(ICSSParser.PropertyContext ctx) {
 		PropertyName property = new PropertyName(ctx.getText());
 		currentContainer.push(property);
@@ -110,20 +134,20 @@ public class ASTListener extends ICSSBaseListener {
 		currentContainer.peek().addChild(property);
 	}
 
-	@Override
-	public void enterExpression(ICSSParser.ExpressionContext ctx) {
-		if (ctx.COLOR() != null) {
-			Expression expression = new ColorLiteral(ctx.getText());
-			currentContainer.push(expression);
-		} else if (ctx.PIXELSIZE() != null) {
-			Expression expression = new PixelLiteral(ctx.getText());
-			currentContainer.push(expression);
-		} else throw new IllegalStateException("Expression cannot be empty");
-	}
+	//	@Override
+	//	public void enterExpression(ICSSParser.ExpressionContext ctx) {
+	//		if (ctx.COLOR() != null) {
+	//			Expression expression = new ColorLiteral(ctx.getText());
+	//			currentContainer.push(expression);
+	//		} else if (ctx.PIXELSIZE() != null) {
+	//			Expression expression = new PixelLiteral(ctx.getText());
+	//			currentContainer.push(expression);
+	//		} else throw new IllegalStateException("Expression cannot be empty");
+	//	}
 
-	@Override
-	public void exitExpression(ICSSParser.ExpressionContext ctx) {
-		Expression expression = (Expression) currentContainer.pop();
-		currentContainer.peek().addChild(expression);
-	}
+	//	@Override
+	//	public void exitExpression(ICSSParser.ExpressionContext ctx) {
+	//		Expression expression = (Expression) currentContainer.pop();
+	//		currentContainer.peek().addChild(expression);
+	//	}
 }
