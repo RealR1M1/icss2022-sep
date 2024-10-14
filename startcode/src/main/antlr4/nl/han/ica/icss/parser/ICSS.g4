@@ -44,10 +44,13 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: stylerule+;
+stylesheet: variableassignment* stylerule+;
 stylerule: selector OPEN_BRACE declaration+ CLOSE_BRACE;
 selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT ;
-declaration: property COLON expression SEMICOLON;
+declaration: property COLON (expression | variablereference) SEMICOLON;
 property: LOWER_IDENT;
-expression: PIXELSIZE #pixelSize | COLOR #color;
+expression: PIXELSIZE #pixelSize | COLOR #color | bool #boolean;
+variableassignment: variablereference ASSIGNMENT_OPERATOR expression SEMICOLON;
+variablereference: CAPITAL_IDENT;
+bool: TRUE | FALSE;
 
