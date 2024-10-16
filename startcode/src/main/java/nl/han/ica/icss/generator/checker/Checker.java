@@ -68,6 +68,7 @@ public class Checker {
         }
     }
 
+    // TODO: refactor
     private void checkDeclaration(Declaration node) {
         if (node.property.name.equals("width")) {
             if (node.expression instanceof VariableReference) {

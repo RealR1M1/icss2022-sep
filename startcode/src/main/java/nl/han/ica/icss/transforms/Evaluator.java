@@ -23,8 +23,35 @@ public class Evaluator implements Transform {
     @Override
     public void apply(AST ast) {
         //variableValues = new HANLinkedList<>();
+        applyStylesheet(ast.root);
+    }
+
+    private void applyStylesheet(Stylesheet node) {
+
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof Stylerule) {
+                ApplyStylerule((Stylerule) child);
+            }
+        }
+
 
     }
 
-    
+    private void ApplyStylerule(Stylerule node) {
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof Declaration) {
+                applyDeclaration((Declaration) child);
+            }
+        }
+    }
+
+    private void applyDeclaration(Declaration node) {
+        node.expression = evalExpression(node.expression);
+    }
+
+    private Expression evalExpression(Expression expression) {
+
+    }
+
+
 }
