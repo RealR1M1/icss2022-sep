@@ -27,14 +27,11 @@ public class Evaluator implements Transform {
     }
 
     private void applyStylesheet(Stylesheet node) {
-
         for (ASTNode child : node.getChildren()) {
             if (child instanceof Stylerule) {
                 ApplyStylerule((Stylerule) child);
             }
         }
-
-
     }
 
     private void ApplyStylerule(Stylerule node) {
