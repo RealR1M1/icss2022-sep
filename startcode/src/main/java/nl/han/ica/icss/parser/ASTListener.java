@@ -169,21 +169,4 @@ public class ASTListener extends ICSSBaseListener {
 		PropertyName property = (PropertyName) currentContainer.pop();
 		currentContainer.peek().addChild(property);
 	}
-
-	//	@Override
-	//	public void enterExpression(ICSSParser.ExpressionContext ctx) {
-	//		if (ctx.COLOR() != null) {
-	//			Expression expression = new ColorLiteral(ctx.getText());
-	//			currentContainer.push(expression);
-	//		} else if (ctx.PIXELSIZE() != null) {
-	//			Expression expression = new PixelLiteral(ctx.getText());
-	//			currentContainer.push(expression);
-	//		} else throw new IllegalStateException("Expression cannot be empty");
-	//	}
-
-	//	@Override
-	//	public void exitExpression(ICSSParser.ExpressionContext ctx) {
-	//		Expression expression = (Expression) currentContainer.pop();
-	//		currentContainer.peek().addChild(expression);
-	//	}
 }
