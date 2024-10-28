@@ -20,9 +20,7 @@ public class Checker {
 
     public void check(AST ast) {
         variableTypes = new HANLinkedList<>();
-
         checkStylesheet(ast.root);
-
     }
 
     private void checkStylesheet(Stylesheet node){

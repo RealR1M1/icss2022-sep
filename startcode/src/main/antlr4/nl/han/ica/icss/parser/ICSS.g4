@@ -45,12 +45,17 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: variableassignment* stylerule+;
-stylerule: selector OPEN_BRACE declaration+ CLOSE_BRACE;
-selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT ;
-declaration: property COLON (expression | variablereference) SEMICOLON;
+stylerule: selector OPEN_BRACE declaration+ (ifstatement)? (declaration+)? CLOSE_BRACE;
+selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT;
+declaration: property COLON (expression | variablereference) (operator (expression | variablereference | SCALAR))* SEMICOLON;
+
+ifstatement: IF BOX_BRACKET_OPEN variablereference BOX_BRACKET_CLOSE OPEN_BRACE (declaration+ (ifstatement)? (elsestatement)?)+ CLOSE_BRACE;
+elsestatement: CLOSE_BRACE ELSE OPEN_BRACE declaration+;
+
 property: LOWER_IDENT;
 expression: PIXELSIZE #pixelSize | COLOR #color | bool #boolean;
 variableassignment: variablereference ASSIGNMENT_OPERATOR expression SEMICOLON;
 variablereference: CAPITAL_IDENT;
 bool: TRUE | FALSE;
+operator: PLUS | MIN | MUL;
 
