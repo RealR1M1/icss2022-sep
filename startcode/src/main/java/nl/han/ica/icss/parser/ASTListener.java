@@ -42,6 +42,7 @@ public class ASTListener extends ICSSBaseListener {
 	@Override
 	public void exitStylesheet(ICSSParser.StylesheetContext ctx) {
         ast.root = (Stylesheet) currentContainer.pop();
+		System.out.println(ast);
 	}
 
 	@Override
@@ -97,16 +98,7 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void exitSelector(ICSSParser.SelectorContext ctx) {
-		Selector selector = null;
-
-		if (ctx.LOWER_IDENT() != null){
-			selector = (TagSelector) currentContainer.pop();
-		} else if (ctx.CLASS_IDENT() != null){
-			selector = (ClassSelector) currentContainer.pop();
-		} else if (ctx.ID_IDENT() != null) {
-			selector = (IdSelector) currentContainer.pop();
-		}
-
+		Selector selector = (Selector) currentContainer.pop();
 		currentContainer.peek().addChild(selector);
 	}
 
@@ -120,6 +112,64 @@ public class ASTListener extends ICSSBaseListener {
 	public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
 		Declaration declaration = (Declaration) currentContainer.pop();
 		currentContainer.peek().addChild(declaration);
+	}
+
+	@Override
+	public void enterIfstatement(ICSSParser.IfstatementContext ctx) {
+		IfClause ifClause = new IfClause();
+		currentContainer.push(ifClause);
+	}
+
+	public void exitIfstatement(ICSSParser.IfstatementContext ctx) {
+		IfClause ifClause = (IfClause) currentContainer.pop();
+		currentContainer.peek().addChild(ifClause);
+	}
+
+	@Override
+	public void enterElsestatement(ICSSParser.ElsestatementContext ctx) {
+		ElseClause elseClause = new ElseClause();
+		currentContainer.push(elseClause);
+	}
+
+	public void exitElsestatement(ICSSParser.ElsestatementContext ctx) {
+		ElseClause elseClause = (ElseClause) currentContainer.pop();
+		currentContainer.peek().addChild(elseClause);
+	}
+
+	@Override
+	public void enterAddexpression(ICSSParser.AddexpressionContext ctx) {
+		AddOperation addOperation = new AddOperation();
+		currentContainer.push(addOperation);
+	}
+
+	@Override
+	public void exitAddexpression(ICSSParser.AddexpressionContext ctx) {
+		AddOperation addOperation = (AddOperation) currentContainer.pop();
+		currentContainer.peek().addChild(addOperation);
+	}
+
+	@Override
+	public void enterMultiexpression(ICSSParser.MultiexpressionContext ctx) {
+		MultiplyOperation multiplyOperation = new MultiplyOperation();
+		currentContainer.push(multiplyOperation);
+	}
+
+	@Override
+	public void exitMultiexpression(ICSSParser.MultiexpressionContext ctx) {
+		MultiplyOperation multiplyOperation = (MultiplyOperation) currentContainer.pop();
+		currentContainer.peek().addChild(multiplyOperation);
+	}
+
+	@Override
+	public void enterSubtractexpression(ICSSParser.SubtractexpressionContext ctx) {
+		SubtractOperation subtractOperation = new SubtractOperation();
+		currentContainer.push(subtractOperation);
+	}
+
+	@Override
+	public void exitSubtractexpression(ICSSParser.SubtractexpressionContext ctx) {
+		SubtractOperation subtractOperation = (SubtractOperation) currentContainer.pop();
+		currentContainer.peek().addChild(subtractOperation);
 	}
 
 	@Override
@@ -156,6 +206,18 @@ public class ASTListener extends ICSSBaseListener {
 	public void exitBool(ICSSParser.BoolContext ctx) {
 		BoolLiteral boolLiteral = (BoolLiteral) currentContainer.pop();
 		currentContainer.peek().addChild(boolLiteral);
+	}
+
+	@Override
+	public void enterScalar(ICSSParser.ScalarContext ctx) {
+		ScalarLiteral scalarLiteral = new ScalarLiteral(ctx.getText());
+		currentContainer.push(scalarLiteral);
+	}
+
+	@Override
+	public void exitScalar(ICSSParser.ScalarContext ctx) {
+		ScalarLiteral scalarLiteral = (ScalarLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(scalarLiteral);
 	}
 
 	@Override

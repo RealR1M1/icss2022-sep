@@ -4,8 +4,10 @@ import nl.han.ica.datastructures.HANLinkedList;
 import nl.han.ica.datastructures.HANListNode;
 import nl.han.ica.datastructures.IHANLinkedList;
 import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.BoolLiteral;
 import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
+import nl.han.ica.icss.ast.literals.ScalarLiteral;
 import nl.han.ica.icss.ast.types.ExpressionType;
 
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ import java.util.HashMap;
 public class Checker {
 
     private IHANLinkedList<HashMap<String, ExpressionType>> variableTypes;
-    private HashMap<String, ExpressionType> map = new HashMap<>();;
+    private HashMap<String, ExpressionType> map = new HashMap<>();
 
     public void check(AST ast) {
         variableTypes = new HANLinkedList<>();
@@ -50,9 +52,12 @@ public class Checker {
 
         if (expression instanceof ColorLiteral){
             type = ExpressionType.COLOR;
-
         } else if (expression instanceof PixelLiteral){
             type = ExpressionType.PIXEL;
+        } else if (expression instanceof ScalarLiteral){
+            type = ExpressionType.SCALAR;
+        } else if (expression instanceof BoolLiteral){
+            type = ExpressionType.BOOL;
         }
 
         return type;
@@ -63,11 +68,15 @@ public class Checker {
             if (child instanceof Declaration) {
                 checkDeclaration((Declaration) child);
             }
+            if (child instanceof IfClause) {
+                checkIfStatement((IfClause) child);
+            }
         }
     }
 
     // TODO: refactor
     private void checkDeclaration(Declaration node) {
+        System.out.println(node);
         if (node.property.name.equals("width")) {
             if (node.expression instanceof VariableReference) {
                 HashMap <String, ExpressionType> map = variableTypes.get(0);
@@ -96,4 +105,16 @@ public class Checker {
         }
     }
 
+    private void checkIfStatement(IfClause node) {
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof VariableReference) {
+                HashMap <String, ExpressionType> map = variableTypes.get(0);
+                String varName = ((VariableReference) child).name;
+                ExpressionType type = map.get(varName);
+                if (!type.equals(ExpressionType.BOOL)) {
+                    node.setError("Statement must have boolean value");
+                }
+            }
+        }
+    }
 }
