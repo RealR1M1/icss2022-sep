@@ -22,11 +22,9 @@ public class Checker {
 
     private void checkStylesheet(Stylesheet node) {
         for (ASTNode child : node.getChildren()) {
-
             if (child instanceof VariableAssignment) {
                 checkVariableAssignment((VariableAssignment) child, map);
             }
-
             if (child instanceof Stylerule) {
                 checkStylerule((Stylerule) child);
             }
@@ -42,12 +40,11 @@ public class Checker {
         }
     }
 
-    private boolean checkVariableReference(VariableReference node, ExpressionType expressionType) {
+    private ExpressionType checkVariableReference(VariableReference node) {
         HashMap<String, ExpressionType> map = variableTypes.get(0);
         String varName = node.name;
-        ExpressionType type = map.get(varName);
 
-        return type.equals(expressionType);
+        return map.get(varName);
     }
 
     private ExpressionType getExpressionType(Expression expression) {
@@ -78,81 +75,74 @@ public class Checker {
     }
 
     private void checkDeclaration(Declaration node) {
-        if (node.property.name.contains("width") || node.property.name.contains("height")) {
-            for (ASTNode child : node.getChildren()) {
-                if (child instanceof Expression) {
-                    checkExpression((Expression) child, ExpressionType.PIXEL);
+        switch (node.property.name) {
+            case "width":
+                if (checkExpression(node.expression) != ExpressionType.PIXEL){
+                    node.setError("width must be defined in pixels");
                 }
-            }
-        } else if (node.property.name.contains("color")) {
-            for (ASTNode child : node.getChildren()) {
-                if (child instanceof Expression) {
-                    checkExpression((Expression) child, ExpressionType.COLOR);
+                break;
+            case "height":
+                if (checkExpression(node.expression) != ExpressionType.PIXEL){
+                    node.setError("height must be defined in pixels");
                 }
-            }
+                break;
+            case "color":
+                if (checkExpression(node.expression) != ExpressionType.COLOR){
+                    node.setError("color must be defined in hexcode");
+                }
+                break;
+            case "background-color":
+                if (checkExpression(node.expression) != ExpressionType.COLOR){
+                    node.setError("background color must be defined in hexcode");
+                }
+                break;
+            default:
+                node.setError("unsupported property name");
         }
     }
 
-    private void checkExpression(Expression node, ExpressionType expressionType) {
+    private ExpressionType checkExpression(Expression node) {
         if (node instanceof Operation) {
-            checkOperation((Operation) node, expressionType);
+            return checkOperation((Operation) node);
         } else {
-            if (node instanceof VariableReference) {
-                System.out.println(node);
-                if (!(checkVariableReference((VariableReference) node, expressionType))) {
-                    node.setError("Variable reference doesn't match required type");
-                }
-            } else if (expressionType == ExpressionType.COLOR) {
-                if (!(node instanceof ColorLiteral)) {
-                    node.setError("Expression must have a color literal");
-                }
-            } else if (expressionType == ExpressionType.PIXEL) {
-                if (!(node instanceof PixelLiteral)) {
-                    node.setError("Expression must have a pixel literal");
-                }
-            } else if (expressionType == ExpressionType.SCALAR) {
-                if (!(node instanceof ScalarLiteral)) {
-                    node.setError("Expression must have a scalar literal");
-                }
-            } else if (expressionType == ExpressionType.BOOL) {
-                if (!(node instanceof BoolLiteral)) {
-                    node.setError("Expression must have a bool literal");
-                }
-            } else if (expressionType == ExpressionType.PERCENTAGE) {
-                if (!(node instanceof PercentageLiteral)) {
-                    node.setError("Expression must have a percentage literal");
-                }
-            }
+            return checkExpressionType(node);
         }
     }
 
-    private void checkOperation(Operation node, ExpressionType type) {
+    private ExpressionType checkOperation(Operation node) {
+
+        ExpressionType left;
+        ExpressionType right;
+
         //check if children are also operations
         if (node.lhs instanceof Operation) {
-            checkOperation((Operation) node.lhs, type);
-        } else if (node.rhs instanceof Operation) {
-            checkOperation((Operation) node.rhs, type);
+            left = checkOperation((Operation) node.lhs);
+        } else {
+            left = checkExpressionType(node.lhs);
+        }
+
+        if (node.rhs instanceof Operation) {
+            right = checkOperation((Operation) node.rhs);
+        } else {
+            right = checkExpressionType(node.rhs);
+        }
+
+        if (node.lhs instanceof ColorLiteral || node.lhs instanceof BoolLiteral || node.rhs instanceof ColorLiteral || node.rhs instanceof BoolLiteral) {
+            node.setError("Colors and Booleans are not allowed in operations");
         }
 
         if (node instanceof MultiplyOperation) { //check if one of the children is a scalar value
             if (node.lhs instanceof ScalarLiteral && node.rhs instanceof ScalarLiteral) {
                 node.setError("Expression must have at least one scalar literal");
             }
+            return right != ExpressionType.SCALAR ? right : left;
 
         } else {// check if both sides are the same literal
-            if (node.lhs instanceof ColorLiteral || node.lhs instanceof BoolLiteral || node.rhs instanceof ColorLiteral || node.rhs instanceof BoolLiteral) {
-                node.setError("Colors and Booleans are not allowed in operations");
-            }
-
-            // fix in case either is an operation
-            ExpressionType left = checkExpressionType(node.lhs);
-            ExpressionType right = checkExpressionType(node.rhs);
-
             if (!left.equals(right)) {
                 node.setError("Expressions must have the same type");
             }
-
         }
+        return left;
     }
 
     private void checkIfStatement(IfClause node) {
@@ -169,33 +159,21 @@ public class Checker {
     }
 
     public ExpressionType checkExpressionType(Expression expression) {
-
         if (expression instanceof VariableReference) {
-            if (checkVariableReference((VariableReference) expression, ExpressionType.PIXEL)) {
-                return ExpressionType.PIXEL;
-            } else if (checkVariableReference((VariableReference) expression, ExpressionType.COLOR)) {
-                return ExpressionType.COLOR;
-            } else if (checkVariableReference((VariableReference) expression, ExpressionType.SCALAR)) {
-                return ExpressionType.SCALAR;
-            } else if (checkVariableReference((VariableReference) expression, ExpressionType.BOOL)) {
-                return ExpressionType.BOOL;
-            } else if (checkVariableReference((VariableReference) expression, ExpressionType.PERCENTAGE)) {
+            return checkVariableReference((VariableReference) expression);
+        } else {
+            if (expression instanceof PercentageLiteral) {
                 return ExpressionType.PERCENTAGE;
+            } else if (expression instanceof PixelLiteral) {
+                return ExpressionType.PIXEL;
+            } else if (expression instanceof ColorLiteral) {
+                return ExpressionType.COLOR;
+            } else if (expression instanceof ScalarLiteral) {
+                return ExpressionType.SCALAR;
+            } else if (expression instanceof BoolLiteral) {
+                return ExpressionType.BOOL;
             }
         }
-
-        if (expression instanceof PercentageLiteral) {
-            return ExpressionType.PERCENTAGE;
-        } else if (expression instanceof PixelLiteral) {
-            return ExpressionType.PIXEL;
-        } else if (expression instanceof ColorLiteral) {
-            return ExpressionType.COLOR;
-        } else if (expression instanceof ScalarLiteral) {
-            return ExpressionType.SCALAR;
-        } else if (expression instanceof BoolLiteral) {
-            return ExpressionType.BOOL;
-        }
-
         return ExpressionType.UNDEFINED;
     }
 }
