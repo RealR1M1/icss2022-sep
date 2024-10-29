@@ -1,7 +1,5 @@
 package nl.han.ica.icss.parser;
 
-import java.util.Stack;
-
 
 import nl.han.ica.datastructures.HANStack;
 import nl.han.ica.datastructures.IHANStack;
@@ -42,7 +40,6 @@ public class ASTListener extends ICSSBaseListener {
 	@Override
 	public void exitStylesheet(ICSSParser.StylesheetContext ctx) {
         ast.root = (Stylesheet) currentContainer.pop();
-		System.out.println(ast);
 	}
 
 	@Override
@@ -218,6 +215,18 @@ public class ASTListener extends ICSSBaseListener {
 	public void exitScalar(ICSSParser.ScalarContext ctx) {
 		ScalarLiteral scalarLiteral = (ScalarLiteral) currentContainer.pop();
 		currentContainer.peek().addChild(scalarLiteral);
+	}
+
+	@Override
+	public void enterPercentage(ICSSParser.PercentageContext ctx) {
+		PercentageLiteral percentageLiteral = new PercentageLiteral(ctx.getText());
+		currentContainer.push(percentageLiteral);
+	}
+
+	@Override
+	public void exitPercentage(ICSSParser.PercentageContext ctx) {
+		PercentageLiteral percentageLiteral = (PercentageLiteral) currentContainer.pop();
+		currentContainer.peek().addChild(percentageLiteral);
 	}
 
 	@Override

@@ -54,9 +54,7 @@ property: LOWER_IDENT;
 
 expression: expression MUL expression #multiexpression | expression PLUS expression #addexpression | expression MIN expression #subtractexpression | literal #literalexpression | variablereference #variableexpression;
 
-
-
-literal: PIXELSIZE #pixelSize | COLOR #color | bool #boolean | SCALAR #scalar;
+literal: PIXELSIZE #pixelSize | COLOR #color | bool #boolean | SCALAR #scalar | PERCENTAGE #percentage;
 variableassignment: variablereference ASSIGNMENT_OPERATOR expression SEMICOLON;
 variablereference: CAPITAL_IDENT;
 bool: TRUE | FALSE;
