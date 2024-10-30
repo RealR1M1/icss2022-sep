@@ -7,16 +7,13 @@ import nl.han.ica.icss.ast.literals.*;
 import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
-import nl.han.ica.icss.ast.types.ExpressionType;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
 //TODO: SCOPE IMPLEMENTATION, IF-CLAUSE EVALUATION
 public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
-    private HashMap<String, Literal> map = new HashMap<>();
 
     public Evaluator() {
         variableValues = new HANLinkedList<>();
@@ -29,41 +26,56 @@ public class Evaluator implements Transform {
     }
 
     private void applyStylesheet(Stylesheet node) {
+        variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableAssignment) {
-                applyVariableAssignment((VariableAssignment) child);
+                applyVariableAssignment((VariableAssignment) child, variableValues.getFirst());
             }
             if (child instanceof Stylerule) {
                 ApplyStylerule((Stylerule) child);
             }
         }
+        variableValues.removeFirst();
     }
 
-    private void applyVariableAssignment(VariableAssignment node) {
+    private void applyVariableAssignment(VariableAssignment node, HashMap<String, Literal> scope) {
         Expression expression = node.expression;
         node.expression = applyExpression(expression);
-        map.put(node.name.name,(Literal) node.expression);
+        scope.put(node.name.name,(Literal) node.expression);
+    }
 
-        variableValues.addFirst(map);
+    private Literal applyVariableReference(VariableReference node) {
+        if (variableValues.getSize() > 0 && variableValues.getFirst().containsKey(node.name)) {
+            System.out.println("found in current scope");
+            return variableValues.getFirst().get(node.name);
+        } else if (variableValues.getSize() >= 1 || variableValues.get(variableValues.getSize() - 1).get(node.name) != null) {
+            System.out.println("found in parent scope");
+            return variableValues.get(variableValues.getSize() - 1).get(node.name);
+        } else {
+            return null;
+        }
     }
 
     private void ApplyStylerule(Stylerule node) {
+        // Add new scope
+        variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof Declaration) {
                 applyDeclaration((Declaration) child);
             } else if (child instanceof IfClause) {
                 evalIfStatement((IfClause) child);
+            } else if (child instanceof VariableAssignment) {
+                applyVariableAssignment((VariableAssignment) child, variableValues.getFirst());
             }
         }
+        variableValues.removeFirst();
     }
 
     private void evalIfStatement(IfClause node){
         boolean isIfTrue = false;
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableReference) {
-                HashMap<String, Literal> map = variableValues.get(0);
-                String varName = ((VariableReference) child).name;
-                Literal literal = map.get(varName);
+                Literal literal = applyVariableReference((VariableReference) child);
 
                 if (literal instanceof BoolLiteral) {
                     isIfTrue = ((BoolLiteral) literal).value;
@@ -100,9 +112,7 @@ public class Evaluator implements Transform {
         }
         
         if (expression instanceof VariableReference) {
-            HashMap<String, Literal> map = variableValues.get(0);
-            String varName = ((VariableReference) expression).name;
-            return map.get(varName);
+            return applyVariableReference((VariableReference) expression);
         }
         return expression;
     }
@@ -118,9 +128,7 @@ public class Evaluator implements Transform {
         if (operation.lhs instanceof Operation) {
             left = applyOperation((Operation) operation.lhs);
         } else if (operation.lhs instanceof VariableReference) {
-            HashMap<String, Literal> map = variableValues.get(0);
-            String varName = ((VariableReference) operation.lhs).name;
-            left = map.get(varName);
+            left = applyVariableReference((VariableReference) operation.lhs);
         } else {
             left = (Literal) operation.lhs;
         }
@@ -128,9 +136,7 @@ public class Evaluator implements Transform {
         if (operation.rhs instanceof Operation) {
             right = applyOperation((Operation) operation.rhs);
         } else if (operation.rhs instanceof VariableReference) {
-            HashMap<String, Literal> map = variableValues.get(0);
-            String varName = ((VariableReference) operation.rhs).name;
-            right = map.get(varName);
+            right = applyVariableReference((VariableReference) operation.rhs);
         } else {
             right = (Literal) operation.rhs;
         }

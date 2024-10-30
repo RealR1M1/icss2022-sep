@@ -12,7 +12,6 @@ import java.util.HashMap;
 public class Checker {
 
     private IHANLinkedList<HashMap<String, ExpressionType>> variableTypes;
-    private HashMap<String, ExpressionType> map = new HashMap<>();
 
     public void check(AST ast) {
         variableTypes = new HANLinkedList<>();
@@ -33,29 +32,22 @@ public class Checker {
         variableTypes.removeFirst();
     }
 
-    private void checkVariableAssignment(VariableAssignment node, HashMap<String, ExpressionType> map) {
+    private void checkVariableAssignment(VariableAssignment node, HashMap<String, ExpressionType> scope) {
         if (node.expression == null) {
             node.setError("Variable assignment must have an expression");
         } else {
-            map.put(node.name.name, checkExpressionType(node.expression));
-            //variableTypes.addFirst(map);
+            scope.put(node.name.name, checkExpressionType(node.expression));
         }
     }
 
     private ExpressionType checkVariableReference(VariableReference node) {
-        System.out.println(variableTypes.getSize());
-        // Check eigen scope
         if (variableTypes.getSize() > 0 && variableTypes.getFirst().containsKey(node.name)) {
-            System.out.println("found " + variableTypes.getFirst().get(node.name) + "in current scope");
             return variableTypes.getFirst().get(node.name);
         } else if (variableTypes.getSize() >= 1 || variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name)){
-            System.out.println("found " + variableTypes.get(variableTypes.getSize() - 1).get(node.name) + "in parent scope");
             return variableTypes.get(variableTypes.getSize() - 1).get(node.name);
+        } else {
+            return ExpressionType.UNDEFINED;
         }
-        // Check globale scope
-        //return variableTypes.getSize() <= 1 || !variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name);
-
-        return ExpressionType.UNDEFINED;
     }
 
     private void checkStylerule(Stylerule node) {
