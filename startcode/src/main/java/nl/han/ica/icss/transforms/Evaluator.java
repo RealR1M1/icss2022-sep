@@ -8,9 +8,7 @@ import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 //TODO: REDEFINE EXPRESSION
 public class Evaluator implements Transform {
@@ -82,7 +80,21 @@ public class Evaluator implements Transform {
         }
         variableValues.removeFirst();
 
+        checkDuplicates(toAdd);
+
         node.body = toAdd;
+    }
+
+    private void checkDuplicates(ArrayList<ASTNode> toAdd) {
+        Set<String> duplicates = new HashSet<>();
+
+        for (int i = 0; i < toAdd.size(); i++) {
+            duplicates.add(toAdd.get(i).toString());
+
+            if (duplicates.contains(toAdd.get(i).toString())) {
+                //replace value of i
+            }
+        }
     }
 
     private void evalIfStatement(IfClause node, ArrayList<ASTNode> toAdd){
@@ -114,9 +126,6 @@ public class Evaluator implements Transform {
         variableValues.removeFirst();
     }
 
-//    else if (child instanceof ElseClause) {
-//        evalElseStatement((ElseClause) child, toAdd);
-
     private void evalElseStatement(ElseClause node, ArrayList<ASTNode> toAdd) {
         variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
@@ -142,7 +151,6 @@ public class Evaluator implements Transform {
         }
         return expression;
     }
-
 
     private Literal applyOperation(Operation operation) {
         Literal left;
