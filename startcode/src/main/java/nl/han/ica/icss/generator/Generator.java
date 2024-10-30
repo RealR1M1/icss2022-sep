@@ -1,41 +1,66 @@
 package nl.han.ica.icss.generator;
 
 
-import nl.han.ica.icss.ast.AST;
-import nl.han.ica.icss.ast.ASTNode;
-import nl.han.ica.icss.ast.Stylerule;
-import nl.han.ica.icss.ast.Stylesheet;
+import nl.han.ica.icss.ast.*;
+import nl.han.ica.icss.ast.literals.ColorLiteral;
+import nl.han.ica.icss.ast.literals.PercentageLiteral;
+import nl.han.ica.icss.ast.literals.PixelLiteral;
 
 public class Generator {
 
 	public String generate(AST ast) {
-
-		return generateStylesheet((Stylesheet) ast.root);
-
-
+		return generateStylesheet(ast.root);
 
 	}
 
 	private String generateStylesheet(Stylesheet node) {
+		StringBuilder result = new StringBuilder();
+
 		for (ASTNode child : node.getChildren()) {
 			if (child instanceof Stylerule) {
-				return generateStylerule((Stylerule) child);
+				result.append(generateStylerule((Stylerule) child)).append(System.lineSeparator()).append(System.lineSeparator());
 			}
 		}
-        return "";
+        return result.toString();
     }
 
 	private String generateStylerule(Stylerule stylerule) {
-		String result = stylerule.selectors.get(0).toString() + " {\n";
-		result += "\t" + generateDeclaration(stylerule.body.get(0)); //TODO: fix
-		result += "\n}";
+		for (ASTNode child : stylerule.getChildren()) {
+
+			Selector selector = null;
+			if (child instanceof Selector) {
+				selector = (Selector) child;
+			}
+
+            assert selector != null;
+            StringBuilder result = new StringBuilder(selector + " {\n");
+
+			for (int i = 0; i < stylerule.body.size(); i++) {
+				result.append("  ").append(generateDeclaration((Declaration) stylerule.body.get(i)));
+			}
+			result.append("}");
+
+			return result.toString();
+		}
+		return "";
+	}
+
+	private String generateDeclaration(Declaration declaration) {
+		String result = declaration.property.name;
+		result += ": " + generateExpression(declaration.expression);
+		result += ";\n";
 
 		return result;
 	}
 
-	private String generateDeclaration(ASTNode astNode) {
-		return "Declaration"; //TODO: implement
+	private String generateExpression(Expression expression) {
+		if (expression instanceof PixelLiteral) {
+			return ((PixelLiteral) expression).value + "px";
+		} else if (expression instanceof PercentageLiteral) {
+			return ((PercentageLiteral) expression).value + "%";
+		} else if (expression instanceof ColorLiteral) {
+			return ((ColorLiteral) expression).value;
+		}
+		return "";
 	}
-
-
 }
