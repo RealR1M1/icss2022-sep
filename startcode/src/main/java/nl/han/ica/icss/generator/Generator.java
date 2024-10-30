@@ -6,7 +6,6 @@ import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 
-//TODO: delete if-statements
 public class Generator {
 
 	public String generate(AST ast) {
@@ -26,6 +25,7 @@ public class Generator {
     }
 
 	private String generateStylerule(Stylerule stylerule) {
+		System.out.println(stylerule);
 		for (ASTNode child : stylerule.getChildren()) {
 
 			Selector selector = null;

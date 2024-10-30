@@ -8,9 +8,11 @@ import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-//TODO: SCOPE IMPLEMENTATION, IF-CLAUSE EVALUATION
+//TODO: REDEFINE EXPRESSION
 public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
@@ -26,16 +28,25 @@ public class Evaluator implements Transform {
     }
 
     private void applyStylesheet(Stylesheet node) {
+        List<ASTNode> toRemove = new ArrayList<>();
+
+
         variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableAssignment) {
                 applyVariableAssignment((VariableAssignment) child, variableValues.getFirst());
+                toRemove.add(child);
             }
             if (child instanceof Stylerule) {
                 ApplyStylerule((Stylerule) child);
             }
         }
         variableValues.removeFirst();
+
+        for (ASTNode child : toRemove) {
+            toRemove.remove(child);
+        };
+
     }
 
     private void applyVariableAssignment(VariableAssignment node, HashMap<String, Literal> scope) {
@@ -46,10 +57,8 @@ public class Evaluator implements Transform {
 
     private Literal applyVariableReference(VariableReference node) {
         if (variableValues.getSize() > 0 && variableValues.getFirst().containsKey(node.name)) {
-            System.out.println("found in current scope");
             return variableValues.getFirst().get(node.name);
         } else if (variableValues.getSize() >= 1 || variableValues.get(variableValues.getSize() - 1).get(node.name) != null) {
-            System.out.println("found in parent scope");
             return variableValues.get(variableValues.getSize() - 1).get(node.name);
         } else {
             return null;
@@ -57,21 +66,28 @@ public class Evaluator implements Transform {
     }
 
     private void ApplyStylerule(Stylerule node) {
+        ArrayList<ASTNode> toAdd = new ArrayList<>();
+
         // Add new scope
         variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof Declaration) {
                 applyDeclaration((Declaration) child);
+                toAdd.add(child);
             } else if (child instanceof IfClause) {
-                evalIfStatement((IfClause) child);
+                evalIfStatement((IfClause) child, toAdd);
             } else if (child instanceof VariableAssignment) {
                 applyVariableAssignment((VariableAssignment) child, variableValues.getFirst());
             }
         }
         variableValues.removeFirst();
+
+        node.body = toAdd;
     }
 
-    private void evalIfStatement(IfClause node){
+    private void evalIfStatement(IfClause node, ArrayList<ASTNode> toAdd){
+        //define new scope
+        variableValues.addFirst(new HashMap<>());
         boolean isIfTrue = false;
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableReference) {
@@ -83,23 +99,33 @@ public class Evaluator implements Transform {
             }
             if (isIfTrue) {
                 if (child instanceof IfClause) { //kinda recursive? no clue if this is correct
-                    evalIfStatement((IfClause) child);
-                } else if (child instanceof ElseClause) {
-                    evalElseStatement((ElseClause) child);
+                    evalIfStatement((IfClause) child, toAdd);
                 } else if (child instanceof Declaration) {
                     applyDeclaration((Declaration) child);
+                    toAdd.add(child);
                 }
+            } else {
                 System.out.println(child);
+                if (child instanceof ElseClause) {
+                    evalElseStatement((ElseClause) child, toAdd);
+                }
             }
         }
+        variableValues.removeFirst();
     }
 
-    private void evalElseStatement(ElseClause node) {
+//    else if (child instanceof ElseClause) {
+//        evalElseStatement((ElseClause) child, toAdd);
+
+    private void evalElseStatement(ElseClause node, ArrayList<ASTNode> toAdd) {
+        variableValues.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof Declaration) {
                 applyDeclaration((Declaration) child);
+                toAdd.add(child);
             }
         }
+        variableValues.removeFirst();
     }
 
     private void applyDeclaration(Declaration declaration) {

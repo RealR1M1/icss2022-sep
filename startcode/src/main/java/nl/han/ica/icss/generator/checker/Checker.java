@@ -146,9 +146,7 @@ public class Checker {
     private void checkIfStatement(IfClause node) {
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableReference) {
-                HashMap<String, ExpressionType> map = variableTypes.get(0);
-                String varName = ((VariableReference) child).name;
-                ExpressionType type = map.get(varName);
+                ExpressionType type = checkVariableReference((VariableReference) child);
                 if (!type.equals(ExpressionType.BOOL)) {
                     node.setError("Statement must have boolean value");
                 }
