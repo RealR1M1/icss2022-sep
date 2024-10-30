@@ -12,6 +12,7 @@ import nl.han.ica.icss.ast.types.ExpressionType;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+//TODO: SCOPE IMPLEMENTATION, IF-CLAUSE EVALUATION
 public class Evaluator implements Transform {
 
     private IHANLinkedList<HashMap<String, Literal>> variableValues;
@@ -44,6 +45,49 @@ public class Evaluator implements Transform {
         map.put(node.name.name,(Literal) node.expression);
 
         variableValues.addFirst(map);
+    }
+
+    private void ApplyStylerule(Stylerule node) {
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof Declaration) {
+                applyDeclaration((Declaration) child);
+            } else if (child instanceof IfClause) {
+                evalIfStatement((IfClause) child);
+            }
+        }
+    }
+
+    private void evalIfStatement(IfClause node){
+        boolean isIfTrue = false;
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof VariableReference) {
+                HashMap<String, Literal> map = variableValues.get(0);
+                String varName = ((VariableReference) child).name;
+                Literal literal = map.get(varName);
+
+                if (literal instanceof BoolLiteral) {
+                    isIfTrue = ((BoolLiteral) literal).value;
+                }
+            }
+            if (isIfTrue) {
+                if (child instanceof IfClause) { //kinda recursive? no clue if this is correct
+                    evalIfStatement((IfClause) child);
+                } else if (child instanceof ElseClause) {
+                    evalElseStatement((ElseClause) child);
+                } else if (child instanceof Declaration) {
+                    applyDeclaration((Declaration) child);
+                }
+                System.out.println(child);
+            }
+        }
+    }
+
+    private void evalElseStatement(ElseClause node) {
+        for (ASTNode child : node.getChildren()) {
+            if (child instanceof Declaration) {
+                applyDeclaration((Declaration) child);
+            }
+        }
     }
 
     private void applyDeclaration(Declaration declaration) {
@@ -128,47 +172,5 @@ public class Evaluator implements Transform {
             return ((PercentageLiteral) literal).value;
         }
         return 0;
-    }
-
-    private void ApplyStylerule(Stylerule node) {
-        for (ASTNode child : node.getChildren()) {
-            if (child instanceof Declaration) {
-                applyDeclaration((Declaration) child);
-            } else if (child instanceof IfClause) {
-                evalIfStatement((IfClause) child);
-            }
-        }
-    }
-
-    private void evalIfStatement(IfClause node){
-        boolean isIfTrue = false;
-        for (ASTNode child : node.getChildren()) {
-            if (child instanceof VariableReference) {
-                HashMap<String, Literal> map = variableValues.get(0);
-                String varName = ((VariableReference) child).name;
-                Literal literal = map.get(varName);
-
-                if (literal instanceof BoolLiteral) {
-                    isIfTrue = ((BoolLiteral) literal).value;
-                }
-            }
-            if (isIfTrue) {
-                if (child instanceof IfClause) { //kinda recursive? no clue if this is correct
-                    evalIfStatement((IfClause) child);
-                } else if (child instanceof ElseClause) {
-                    evalElseStatement((ElseClause) child);
-                } else if (child instanceof Declaration) {
-                    applyDeclaration((Declaration) child);
-                }
-            }
-        }
-    }
-
-    private void evalElseStatement(ElseClause node) {
-        for (ASTNode child : node.getChildren()) {
-            if (child instanceof Declaration) {
-                applyDeclaration((Declaration) child);
-            }
-        }
     }
 }

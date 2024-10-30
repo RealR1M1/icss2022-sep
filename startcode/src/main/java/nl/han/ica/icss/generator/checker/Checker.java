@@ -9,7 +9,6 @@ import nl.han.ica.icss.ast.types.ExpressionType;
 
 import java.util.HashMap;
 
-
 public class Checker {
 
     private IHANLinkedList<HashMap<String, ExpressionType>> variableTypes;
@@ -21,14 +20,17 @@ public class Checker {
     }
 
     private void checkStylesheet(Stylesheet node) {
+        // Add new scope
+        variableTypes.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
             if (child instanceof VariableAssignment) {
-                checkVariableAssignment((VariableAssignment) child, map);
+                checkVariableAssignment((VariableAssignment) child, variableTypes.getFirst());
             }
             if (child instanceof Stylerule) {
                 checkStylerule((Stylerule) child);
             }
         }
+        variableTypes.removeFirst();
     }
 
     private void checkVariableAssignment(VariableAssignment node, HashMap<String, ExpressionType> map) {
@@ -36,19 +38,33 @@ public class Checker {
             node.setError("Variable assignment must have an expression");
         } else {
             map.put(node.name.name, checkExpressionType(node.expression));
-            variableTypes.addFirst(map);
+            //variableTypes.addFirst(map);
         }
     }
 
     private ExpressionType checkVariableReference(VariableReference node) {
-        HashMap<String, ExpressionType> map = variableTypes.get(0);
-        String varName = node.name;
+        System.out.println(variableTypes.getSize());
+        // Check eigen scope
+        if (variableTypes.getSize() > 0 && variableTypes.getFirst().containsKey(node.name)) {
+            System.out.println("found " + variableTypes.getFirst().get(node.name) + "in current scope");
+            return variableTypes.getFirst().get(node.name);
+        } else if (variableTypes.getSize() >= 1 || variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name)){
+            System.out.println("found " + variableTypes.get(variableTypes.getSize() - 1).get(node.name) + "in parent scope");
+            return variableTypes.get(variableTypes.getSize() - 1).get(node.name);
+        }
+        // Check globale scope
+        //return variableTypes.getSize() <= 1 || !variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name);
 
-        return map.get(varName);
+        return ExpressionType.UNDEFINED;
     }
 
     private void checkStylerule(Stylerule node) {
+        // Add new scope
+        variableTypes.addFirst(new HashMap<>());
         for (ASTNode child : node.getChildren()) {
+            if (child instanceof VariableAssignment) {
+                checkVariableAssignment((VariableAssignment) child, variableTypes.getFirst());
+            }
             if (child instanceof Declaration) {
                 checkDeclaration((Declaration) child);
             }
@@ -56,6 +72,8 @@ public class Checker {
                 checkIfStatement((IfClause) child);
             }
         }
+        // Delete scope
+        variableTypes.removeFirst();
     }
 
     private void checkDeclaration(Declaration node) {

@@ -6,6 +6,7 @@ import nl.han.ica.icss.ast.literals.ColorLiteral;
 import nl.han.ica.icss.ast.literals.PercentageLiteral;
 import nl.han.ica.icss.ast.literals.PixelLiteral;
 
+//TODO: delete if-statements
 public class Generator {
 
 	public String generate(AST ast) {
@@ -36,7 +37,11 @@ public class Generator {
             StringBuilder result = new StringBuilder(selector + " {\n");
 
 			for (int i = 0; i < stylerule.body.size(); i++) {
-				result.append("  ").append(generateDeclaration((Declaration) stylerule.body.get(i)));
+
+				//Only append declarations into stringbuilder
+				if (stylerule.body.get(i) instanceof Declaration) {
+					result.append("  ").append(generateDeclaration((Declaration) stylerule.body.get(i)));
+				}
 			}
 			result.append("}");
 

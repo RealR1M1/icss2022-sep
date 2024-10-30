@@ -51,7 +51,7 @@ public class HANLinkedList<ASTNode> implements IHANLinkedList<ASTNode> {
         if (pos < 0 || pos >= size) {
             throw new IndexOutOfBoundsException();
         }
-        HANListNode<ASTNode> currentNode = header.getNext();
+        HANListNode<ASTNode> currentNode = header;
         for (int i = 0; i < pos; i++) {
             currentNode = currentNode.getNext();
         }

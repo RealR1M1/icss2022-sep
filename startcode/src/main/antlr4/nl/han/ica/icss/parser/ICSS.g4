@@ -45,7 +45,7 @@ ASSIGNMENT_OPERATOR: ':=';
 
 //--- PARSER: ---
 stylesheet: variableassignment* stylerule+;
-stylerule: selector OPEN_BRACE declaration+ (ifstatement)? (declaration+)? CLOSE_BRACE;
+stylerule: selector OPEN_BRACE  (variableassignment*)? declaration+ (ifstatement*)? (declaration+)? CLOSE_BRACE;
 selector: LOWER_IDENT | ID_IDENT | CLASS_IDENT;
 declaration: property COLON expression SEMICOLON;
 ifstatement: IF BOX_BRACKET_OPEN variablereference BOX_BRACKET_CLOSE OPEN_BRACE (declaration+ (ifstatement)? (elsestatement)?)+ CLOSE_BRACE;
