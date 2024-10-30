@@ -35,7 +35,7 @@ public class Checker {
         if (node.expression == null) {
             node.setError("Variable assignment must have an expression");
         } else {
-            map.put(node.name.name, getExpressionType(node.expression));
+            map.put(node.name.name, checkExpressionType(node.expression));
             variableTypes.addFirst(map);
         }
     }
@@ -45,22 +45,6 @@ public class Checker {
         String varName = node.name;
 
         return map.get(varName);
-    }
-
-    private ExpressionType getExpressionType(Expression expression) {
-        ExpressionType type = null;
-
-        if (expression instanceof ColorLiteral) {
-            type = ExpressionType.COLOR;
-        } else if (expression instanceof PixelLiteral) {
-            type = ExpressionType.PIXEL;
-        } else if (expression instanceof ScalarLiteral) {
-            type = ExpressionType.SCALAR;
-        } else if (expression instanceof BoolLiteral) {
-            type = ExpressionType.BOOL;
-        }
-
-        return type;
     }
 
     private void checkStylerule(Stylerule node) {
@@ -135,7 +119,11 @@ public class Checker {
             if (node.lhs instanceof ScalarLiteral && node.rhs instanceof ScalarLiteral) {
                 node.setError("Expression must have at least one scalar literal");
             }
-            return right != ExpressionType.SCALAR ? right : left;
+            if (right != ExpressionType.SCALAR) {
+                return right;
+            } else {
+                return left;
+            }
 
         } else {// check if both sides are the same literal
             if (!left.equals(right)) {
