@@ -43,7 +43,7 @@ public class Checker {
     private ExpressionType checkVariableReference(VariableReference node) {
         if (variableTypes.getSize() > 0 && variableTypes.getFirst().containsKey(node.name)) {
             return variableTypes.getFirst().get(node.name);
-        } else if (variableTypes.getSize() >= 1 || variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name)){
+        } else if (variableTypes.getSize() >= 1 && variableTypes.get(variableTypes.getSize() - 1).containsKey(node.name)){
             return variableTypes.get(variableTypes.getSize() - 1).get(node.name);
         } else {
             return ExpressionType.UNDEFINED;
@@ -69,29 +69,33 @@ public class Checker {
     }
 
     private void checkDeclaration(Declaration node) {
-        switch (node.property.name) {
-            case "width":
-                if (checkExpression(node.expression) != ExpressionType.PIXEL){
-                    node.setError("width must be defined in pixels");
-                }
-                break;
-            case "height":
-                if (checkExpression(node.expression) != ExpressionType.PIXEL){
-                    node.setError("height must be defined in pixels");
-                }
-                break;
-            case "color":
-                if (checkExpression(node.expression) != ExpressionType.COLOR){
-                    node.setError("color must be defined in hexcode");
-                }
-                break;
-            case "background-color":
-                if (checkExpression(node.expression) != ExpressionType.COLOR){
-                    node.setError("background color must be defined in hexcode");
-                }
-                break;
-            default:
-                node.setError("unsupported property name");
+        if (checkExpression(node.expression) == ExpressionType.UNDEFINED) {
+            node.setError("Variables must be declared");
+        } else {
+            switch (node.property.name) {
+                case "width":
+                    if (checkExpression(node.expression) != ExpressionType.PIXEL) {
+                        node.setError("width must be defined in pixels");
+                    }
+                    break;
+                case "height":
+                    if (checkExpression(node.expression) != ExpressionType.PIXEL) {
+                        node.setError("height must be defined in pixels");
+                    }
+                    break;
+                case "color":
+                    if (checkExpression(node.expression) != ExpressionType.COLOR) {
+                        node.setError("color must be defined in hexcode");
+                    }
+                    break;
+                case "background-color":
+                    if (checkExpression(node.expression) != ExpressionType.COLOR) {
+                        node.setError("background color must be defined in hexcode");
+                    }
+                    break;
+                default:
+                    node.setError("unsupported property name");
+            }
         }
     }
 
