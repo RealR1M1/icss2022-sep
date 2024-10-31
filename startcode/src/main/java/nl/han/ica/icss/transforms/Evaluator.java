@@ -80,25 +80,28 @@ public class Evaluator implements Transform {
         }
         variableValues.removeFirst();
 
-        //checkDuplicates(toAdd);
+        checkDuplicates(toAdd);
 
 
         node.body = toAdd;
     }
 
     private void checkDuplicates(ArrayList<ASTNode> toAdd) {
-        ArrayList<PropertyName> duplicates = new ArrayList<>();
+        ArrayList<String> uniqueProperties = new ArrayList<>();
 
-        for (ASTNode astNode : toAdd) {
-            duplicates.add(((Declaration) astNode).property);
+        for (int i = 0; i < toAdd.size(); i++) {
+            ASTNode astNode = toAdd.get(i);
+            String propertyName = ((Declaration) astNode).property.name;
 
-            PropertyName property = ((Declaration) astNode).property;
-
-            if (duplicates.contains(((Declaration) astNode).property)) {
-                duplicates.set(toAdd.indexOf(astNode), property);
-                toAdd.remove(astNode);
+            if (uniqueProperties.contains(propertyName)) {
+                // Duplicate found, replace the existing node with the new one
+                int duplicateIndex = uniqueProperties.indexOf(propertyName);
+                toAdd.set(duplicateIndex, astNode); // Replace the duplicate with the new one
+                toAdd.remove(i); // Remove the current (duplicate) node
+                i--; // Adjust the index to account for the removal
+            } else {
+                uniqueProperties.add(propertyName);
             }
-            System.out.println(toAdd);
         }
     }
 
