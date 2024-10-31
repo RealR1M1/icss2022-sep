@@ -128,6 +128,8 @@ public class Checker {
         if (node instanceof MultiplyOperation) { //check if one of the children is a scalar value
             if (node.lhs instanceof ScalarLiteral && node.rhs instanceof ScalarLiteral) {
                 node.setError("Expression must have at least one scalar literal");
+            } else if (!(node.lhs instanceof ScalarLiteral) && !(node.rhs instanceof ScalarLiteral)) {
+                node.setError("Expression must have at least one scalar literal");
             }
             if (right != ExpressionType.SCALAR) {
                 return right;

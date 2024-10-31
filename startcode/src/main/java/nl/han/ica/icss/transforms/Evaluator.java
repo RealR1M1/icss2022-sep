@@ -88,15 +88,15 @@ public class Evaluator implements Transform {
     private void checkDuplicates(ArrayList<ASTNode> toAdd) {
         Set<String> duplicates = new HashSet<>();
 
-        for (int i = 0; i < toAdd.size(); i++) {
-            duplicates.add(toAdd.get(i).toString());
+        for (ASTNode astNode : toAdd) {
+            duplicates.add(astNode.toString());
 
-            if (duplicates.contains(toAdd.get(i).toString())) {
+            if (duplicates.contains(astNode.toString())) {
 
-                System.out.println("duplicate declaration found: " + toAdd.get(i).toString());
+                System.out.println("duplicate declaration found: " + astNode.toString());
 
-                if (toAdd.get(i) instanceof Declaration) {
-                    for (ASTNode child : toAdd.get(i).getChildren()) {
+                if (astNode instanceof Declaration) {
+                    for (ASTNode child : astNode.getChildren()) {
                         if (child instanceof ColorLiteral) {
                             //((ColorLiteral) child).value = //value of current node
 
