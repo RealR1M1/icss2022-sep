@@ -92,7 +92,21 @@ public class Evaluator implements Transform {
             duplicates.add(toAdd.get(i).toString());
 
             if (duplicates.contains(toAdd.get(i).toString())) {
-                //replace value of i
+
+                System.out.println("duplicate declaration found: " + toAdd.get(i).toString());
+
+                if (toAdd.get(i) instanceof Declaration) {
+                    for (ASTNode child : toAdd.get(i).getChildren()) {
+                        if (child instanceof ColorLiteral) {
+                            //((ColorLiteral) child).value = //value of current node
+
+                        } else if (child instanceof PixelLiteral) {
+
+                        } else if (child instanceof PercentageLiteral) {
+
+                        }
+                    }
+                }
             }
         }
     }
@@ -117,7 +131,6 @@ public class Evaluator implements Transform {
                     toAdd.add(child);
                 }
             } else {
-                System.out.println(child);
                 if (child instanceof ElseClause) {
                     evalElseStatement((ElseClause) child, toAdd);
                 }

@@ -25,7 +25,6 @@ public class Generator {
     }
 
 	private String generateStylerule(Stylerule stylerule) {
-		System.out.println(stylerule);
 		for (ASTNode child : stylerule.getChildren()) {
 
 			Selector selector = null;
