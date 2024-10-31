@@ -8,6 +8,7 @@ import nl.han.ica.icss.ast.operations.AddOperation;
 import nl.han.ica.icss.ast.operations.MultiplyOperation;
 import nl.han.ica.icss.ast.operations.SubtractOperation;
 
+import javax.lang.model.type.ErrorType;
 import java.util.*;
 
 //TODO: REDEFINE EXPRESSION
@@ -41,10 +42,9 @@ public class Evaluator implements Transform {
         }
         variableValues.removeFirst();
 
-        for (ASTNode child : toRemove) {
+        for (ASTNode child : toRemove) { //produces ConcurrentModificationException
             toRemove.remove(child);
-        };
-
+        }
     }
 
     private void applyVariableAssignment(VariableAssignment node, HashMap<String, Literal> scope) {
@@ -80,34 +80,25 @@ public class Evaluator implements Transform {
         }
         variableValues.removeFirst();
 
-        checkDuplicates(toAdd);
+        //checkDuplicates(toAdd);
+
 
         node.body = toAdd;
     }
 
     private void checkDuplicates(ArrayList<ASTNode> toAdd) {
-        Set<String> duplicates = new HashSet<>();
+        ArrayList<PropertyName> duplicates = new ArrayList<>();
 
         for (ASTNode astNode : toAdd) {
-            duplicates.add(astNode.toString());
+            duplicates.add(((Declaration) astNode).property);
 
-            if (duplicates.contains(astNode.toString())) {
+            PropertyName property = ((Declaration) astNode).property;
 
-                System.out.println("duplicate declaration found: " + astNode.toString());
-
-                if (astNode instanceof Declaration) {
-                    for (ASTNode child : astNode.getChildren()) {
-                        if (child instanceof ColorLiteral) {
-                            //((ColorLiteral) child).value = //value of current node
-
-                        } else if (child instanceof PixelLiteral) {
-
-                        } else if (child instanceof PercentageLiteral) {
-
-                        }
-                    }
-                }
+            if (duplicates.contains(((Declaration) astNode).property)) {
+                duplicates.set(toAdd.indexOf(astNode), property);
+                toAdd.remove(astNode);
             }
+            System.out.println(toAdd);
         }
     }
 
