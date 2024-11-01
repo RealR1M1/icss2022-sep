@@ -132,19 +132,7 @@ public class ASTListener extends ICSSBaseListener {
 		ElseClause elseClause = (ElseClause) currentContainer.pop();
 		currentContainer.peek().addChild(elseClause);
 	}
-
-	@Override
-	public void enterAddexpression(ICSSParser.AddexpressionContext ctx) {
-		AddOperation addOperation = new AddOperation();
-		currentContainer.push(addOperation);
-	}
-
-	@Override
-	public void exitAddexpression(ICSSParser.AddexpressionContext ctx) {
-		AddOperation addOperation = (AddOperation) currentContainer.pop();
-		currentContainer.peek().addChild(addOperation);
-	}
-
+	
 	@Override
 	public void enterMultiexpression(ICSSParser.MultiexpressionContext ctx) {
 		MultiplyOperation multiplyOperation = new MultiplyOperation();
@@ -158,15 +146,21 @@ public class ASTListener extends ICSSBaseListener {
 	}
 
 	@Override
-	public void enterSubtractexpression(ICSSParser.SubtractexpressionContext ctx) {
-		SubtractOperation subtractOperation = new SubtractOperation();
-		currentContainer.push(subtractOperation);
+	public void enterAddorsubtractexpression(ICSSParser.AddorsubtractexpressionContext ctx) {
+		Operation operation = null;
+
+		if (ctx.PLUS() != null) {
+			operation = new AddOperation();
+		} else if (ctx.MIN() != null) {
+			operation = new SubtractOperation();
+		}
+		currentContainer.push(operation);
 	}
 
 	@Override
-	public void exitSubtractexpression(ICSSParser.SubtractexpressionContext ctx) {
-		SubtractOperation subtractOperation = (SubtractOperation) currentContainer.pop();
-		currentContainer.peek().addChild(subtractOperation);
+	public void exitAddorsubtractexpression(ICSSParser.AddorsubtractexpressionContext ctx) {
+		Operation operation = (Operation) currentContainer.pop();
+		currentContainer.peek().addChild(operation);
 	}
 
 	@Override

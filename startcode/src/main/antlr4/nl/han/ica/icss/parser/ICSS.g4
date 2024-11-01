@@ -52,7 +52,7 @@ ifstatement: IF BOX_BRACKET_OPEN variablereference BOX_BRACKET_CLOSE OPEN_BRACE 
 elsestatement: CLOSE_BRACE ELSE OPEN_BRACE declaration+;
 property: LOWER_IDENT;
 
-expression: expression MUL expression #multiexpression | expression PLUS expression #addexpression | expression MIN expression #subtractexpression | literal #literalexpression | variablereference #variableexpression;
+expression: expression MUL expression #multiexpression | expression (PLUS | MIN) expression #addorsubtractexpression | literal #literalexpression | variablereference #variableexpression;
 
 literal: PIXELSIZE #pixelSize | COLOR #color | bool #boolean | SCALAR #scalar | PERCENTAGE #percentage;
 variableassignment: variablereference ASSIGNMENT_OPERATOR expression SEMICOLON;

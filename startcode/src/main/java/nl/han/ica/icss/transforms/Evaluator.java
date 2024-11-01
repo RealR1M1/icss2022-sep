@@ -185,6 +185,8 @@ public class Evaluator implements Transform {
         leftValue = getLiteralValue(left);
         rightValue = getLiteralValue(right);
 
+//        if (operation instanceof operation) {}
+
         if (operation instanceof AddOperation) {
             return newLiteral(left, leftValue + rightValue);
         } else if (operation instanceof SubtractOperation) {
