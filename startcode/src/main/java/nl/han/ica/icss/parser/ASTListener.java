@@ -132,7 +132,7 @@ public class ASTListener extends ICSSBaseListener {
 		ElseClause elseClause = (ElseClause) currentContainer.pop();
 		currentContainer.peek().addChild(elseClause);
 	}
-	
+
 	@Override
 	public void enterMultiexpression(ICSSParser.MultiexpressionContext ctx) {
 		MultiplyOperation multiplyOperation = new MultiplyOperation();
